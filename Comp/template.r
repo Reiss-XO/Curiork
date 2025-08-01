@@ -1,7 +1,3 @@
-
-start_time <- Sys.time()
-
-
 ## Returns a vector of int or float
 getDataType <- function(axiomType) {
   if (axiomType == "INTEGER" | axiomType == "FLOAT") {
@@ -25,7 +21,8 @@ getDataTypeAsString <- function(axiomType) {
 temp_var_columnDataTypesFor_test_data <- list()
 temp_var_columnDataTypesFor_test_data$price <- getDataTypeAsString("FLOAT")
 
-## Read input data
+start_time <- Sys.time()
+## Read input data ie price
 test_data <- read.table(
   "./one_mill_recs.data",
   header = TRUE,
@@ -35,6 +32,8 @@ test_data <- read.table(
   comment.char = "",
   colClasses = c(temp_var_columnDataTypesFor_test_data)
 )
+end_time <- Sys.time()
+
 
 ## Create result structure
 
@@ -70,7 +69,6 @@ file <- file("res.data", "wb")
 write.table(DSResult, file, quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t", eol = "\n", na = "")
 
 
-end_time <- Sys.time()
 
 time_taken =  end_time - start_time
-print(time_takeng)
+print(time_taken)

@@ -1,0 +1,67 @@
+{
+  "name": "Default-DB-read",
+  "description": "R with loading via DB and saving via file",
+  "codeSections": [
+    {
+      "include": "before",
+      "repeatFor": "none",
+      "code": "\n## Initialization section\n\n## Function getDataType(...) which accepts axiom data type as a parameter\n## and returns it's equivalent R data type\ngetDataType <- function(axiomType) { if(axiomType == \"INTEGER\" | axiomType == \"FLOAT\") { return(numeric()) } else { return(character()) } }\n\n## Function getDataTypeAsString(...) which accepts axiom data type as a parameter\n## and returns it's equivalent R data type as string\ngetDataTypeAsString <- function(axiomType) { if(axiomType == \"INTEGER\" | axiomType == \"FLOAT\") { return(\"numeric\") } else { return(\"character\") } }\n"
+    },
+    {
+      "include": "before",
+      "repeatFor": "none",
+      "code": "library(RJDBC)\njdbcDriver <- JDBC(\"oracle.jdbc.OracleDriver\", classPath=\"C:/Users/rsarvaiya/Downloads/R/ojdbc8-12.2.0.1.jar\")"
+    },
+    {
+      "include": "before",
+      "repeatFor": "variable",
+      "code": "\n## Initialize variable '@varName'\n@varName <- @varValue"
+    },
+    {
+      "include": "before",
+      "repeatFor": "inputModel/field",
+      "nestedCode":
+      {
+        "inputModel": "\n## Create a list of the fields in the producing data model '@inputAlias' \n## Also specify the type for each field \ntemp_var_columnDataTypesFor_@inputAlias <- list()",
+        "field": "temp_var_columnDataTypesFor_@inputAlias$@fieldName <- getDataTypeAsString(\"@fieldType\")"
+      }
+    },
+    {
+      "include": "before",
+      "repeatFor": "inputModel",
+      "code": "\n## Populate data frame (representing producing data model '@inputAlias') by querying the database\njdbcConnection <- dbConnect(jdbcDriver, \"jdbc:oracle:thin:@//localhost:1521/xe\", \"@dbSourceUser\", \"@dbSourcePassword\")\n@inputAlias <- dbGetQuery(jdbcConnection, \"@selectStatement\")\ndbDisconnect(jdbcConnection)"
+    },
+    {
+      "include": "before",
+      "repeatFor": "outputSource/field",
+      "nestedCode":
+      {
+        "outputSource": "\n## Create a list representing the columns in the resulting data source '@outputAlias' \n@outputAlias <- list()",
+        "field": "@outputAlias$@fieldName <- getDataType(\"@fieldType\")"
+      }
+    },
+    {
+      "include": "after",
+      "repeatFor": "outputSource/instanceKey",
+      "nestedCode":
+      {
+        "outputSource": "\n## Create a temporary list representing 'asof_date' and 'Instance Keys' for the resulting data source '@outputAlias'. If applicable (i.e for continuous data sources), add asof_date and instance key values. \ntemp_var_asOfDateAndInstanceKeysFor_@outputAlias <- list()",
+        "instanceKey": "temp_var_asOfDateAndInstanceKeysFor_@outputAlias$@ikName = rep(@ikValue, length(@outputAlias[[1]]))"
+      }
+    },
+    {
+      "include": "after",
+      "repeatFor": "outputSource",
+      "code": "\n## Create a resulting data frame, '@outputAlias', for the resulting data source '@outputAlias' which will contain asof_date (if applicable), instance keys (if applicable) and the data source columns.  \n@outputAlias <- as.data.frame(c(temp_var_asOfDateAndInstanceKeysFor_@outputAlias,  as.list(@outputAlias))) \n## Create a handle to the output file \nfile = file(\"@outputFileName\", \"wb\") \n## Write resulting data to the output file \nwrite.table(@outputAlias, file, quote = FALSE, row.names = FALSE, col.names=FALSE, sep = \"\\t\", eol = \"\\n\", na=\"\")"
+    },
+    {
+      "include": "after",
+      "repeatFor": "none",
+      "code": "\n## Finalization section\n## For now, nothing to do in the finalization section. Keeping this section just to demonstrate the feature"
+    }
+  ],
+  "executeCommandWin": "Rterm.exe --no-save --file=@codeFile",
+  "executeCommandLinux": "R --no-save --file=@codeFile",
+  "passCodeAs": "TEMP_FILE"
+}
+

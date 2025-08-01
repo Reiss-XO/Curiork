@@ -1,0 +1,14 @@
+docker run -d \
+  --name oracle-xe-11g \
+  -p 1521:1521 \
+  -p 8080:8080 \
+  -e ORACLE_PASSWORD=oracle \
+  oracleinanutshell/oracle-xe-11g:latest
+
+
+docker exec -it cdce0cb3c7e7026285bc54ecceae7e2900a7f47377276f45bab3fe9ca0e4b976 bash
+
+sqlplus
+
+# id-pwd
+system, oracle
