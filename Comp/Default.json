@@ -1,0 +1,71 @@
+{
+    "name": "Default",
+    "description": "R with loading/saving via file",
+    "codeSections": [
+        {
+            //get data type fns
+            "include": "before",
+            "repeatFor": "none",
+            "code": "\n## Initialization section\n\n## Function getDataType(...) which accepts axiom data type as a parameter\n## and returns it's equivalent R data type\ngetDataType <- function(axiom"
+        },
+        {
+            //to declare some var (not used in current code??)
+            "include": "before",
+            "repeatFor": "variable",
+            "code": "\n## Initialize variable '@varName'\n@varName <- @varValue"
+        },
+        {
+            // create temp list to store price datatype
+            "include": "before",
+            "repeatFor": "inputModel/field",
+            "nestedCode": {
+                "inputModel": "\n## Create a list of the fields in the producing data model '@inputAlias' \n## Also specify the type for each field \ntemp_var_columnDataTypesFor_@inputAlias <- list()",
+                "field": "temp_var_columnDataTypesFor_@inputAlias$@fieldName <- getDataTypeAsString(\"@fieldType\")"
+            }
+        },
+        {
+            //read price data and put in list
+            "include": "before",
+            "repeatFor": "inputModel",
+            "code": "\n## Populate data frame (representing producing data model '@inputAlias') from input file \n@inputAlias <- read.table(\"@inputFileName\", header=TRUE, sep = \"\\t\", quote=\"\","
+        },
+        {
+            //creating DSResult list and given type of output fields
+            "include": "before",
+            "repeatFor": "outputSource/field",
+            "nestedCode": {
+                "outputSource": "\n## Create a list representing the columns in the resulting data source '@outputAlias' \n@outputAlias <- list()",
+                "field": "@outputAlias$@fieldName <- getDataType(\"@fieldType\")"
+            }
+        },
+
+        {
+            //your comp code
+        },
+
+        {
+            //temp list to store asofdate
+            "include": "after",
+            "repeatFor": "outputSource/instanceKey",
+            "nestedCode": {
+                "outputSource": "\n## Create a temporary list representing 'asof_date' and 'Instance Keys' for the resulting data source '@outputAlias'. If applicable (i.e for continuous data sources)",
+                "instanceKey": "temp_var_asOfDateAndInstanceKeysFor_@outputAlias$@ikName = rep(@ikValue, length(@outputAlias[[1]]))"
+            }
+        },
+        {
+            // pushing written code and temp_asofdate to DSResult, cast to DF, and write to fs
+            "include": "after",
+            "repeatFor": "outputSource",
+            "code": "\n## Create a resulting data frame, '@outputAlias', for the resulting data source '@outputAlias' which will contain asof_date (if applicable), instance keys (if applicable) and th"
+        },
+        {
+            //does nothing for now?
+            "include": "after",
+            "repeatFor": "none",
+            "code": "\n## Finalization section\n## For now, nothing to do in the finalization section. Keeping this section just to demonstrate the feature"
+        }
+    ],
+    "executeCommandWin": "Rterm.exe --no-save --file=@codeFile",
+    "executeCommandLinux": "R --no-save --file=@codeFile",
+    "passCodeAs": "TEMP_FILE"
+}
