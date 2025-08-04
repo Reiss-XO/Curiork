@@ -13,7 +13,7 @@ int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     for (int i = 0; i < 1000000; ++i) {
-        int randomNumber = std::rand() % 101; // Generates number between 0 and 100
+        int randomNumber = std::rand() % 101; 
         outFile << randomNumber << "\n";
     }
 

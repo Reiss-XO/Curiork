@@ -1,3 +1,31 @@
+print("DEFAULT.TEMPLATE")
+start_time <- Sys.time()
+# cv internal
+library(RJDBC)
+library(DBI)
+Sys.setenv(TZ = "UTC")
+
+jdbcDriver <- JDBC("oracle.jdbc.OracleDriver", 
+                   classPath = "./ojdbc17.jar")
+
+jdbcConnection <- dbConnect(jdbcDriver, 
+    "jdbc:oracle:thin:@//localhost:1521/xe",
+    "system",        # Your username
+    "oracle")  
+
+print("Connected to ORACLE DB")
+
+
+
+test_result <- dbGetQuery(jdbcConnection, "SELECT * FROM test")
+print("Simulated writing Model Data to a file (.data)")
+
+# Save to .data file
+write.table(test_result, file = "test_output.data", row.names = FALSE, sep = "\t", quote = FALSE)
+
+print("Input Model Data saved to test_output.data")
+#-----------------------
+
 ## Returns a vector of int or float
 getDataType <- function(axiomType) {
   if (axiomType == "INTEGER" | axiomType == "FLOAT") {
@@ -21,7 +49,6 @@ getDataTypeAsString <- function(axiomType) {
 temp_var_columnDataTypesFor_test_data <- list()
 temp_var_columnDataTypesFor_test_data$price <- getDataTypeAsString("FLOAT")
 
-start_time <- Sys.time()
 ## Read input data ie price
 test_data <- read.table(
   "./one_mill_recs.data",
@@ -32,7 +59,7 @@ test_data <- read.table(
   comment.char = "",
   colClasses = c(temp_var_columnDataTypesFor_test_data)
 )
-end_time <- Sys.time()
+print("Read Data from file")
 
 
 ## Create result structure
@@ -55,7 +82,7 @@ for(i in 1:300){
   DSResult$median <- append(DSResult$median, median(test_data$price))
   DSResult$std_dev <- append(DSResult$std_dev, sd(test_data$price))
 }
-
+print("Completed Computation script")
 
 ## Add asof_date and instance keys
 temp_var_asOfDateAndInstanceKeysFor_DSResult <- list()
@@ -67,7 +94,10 @@ DSResult <- as.data.frame(c(temp_var_asOfDateAndInstanceKeysFor_DSResult, as.lis
 ## Write to output file
 file <- file("res.data", "wb")
 write.table(DSResult, file, quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t", eol = "\n", na = "")
+print("Results flushed to Output file")
 
+dbDisconnect(jdbcConnection)
+end_time <- Sys.time()
 
 
 time_taken =  end_time - start_time
