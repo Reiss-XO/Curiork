@@ -12,3 +12,13 @@ sqlplus
 
 # id-pwd
 system, oracle
+
+docker run --name postgres-db \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_USER=system \
+  -e POSTGRES_DB=pg \
+  -p 5432:5432 \
+  -v postgres-data:/var/lib/postgresql/data \
+  -d postgres
+
+docker exec -it postgres-db psql -U system -d postgres
